@@ -5,11 +5,10 @@ const bodyParser = require("body-parser");
 const app = express();
 const port = 3000;
 
-// MongoDB Atlas connection string
 const mongoURI =
   "mongodb+srv://manish9427:manish9427@project.hwbxf7p.mongodb.net/?retryWrites=true&w=majority";
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoURI);
 
 // MongoDB schema for Book
 const bookSchema = new mongoose.Schema({

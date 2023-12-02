@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const express = require("express");
+const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 
 const app = express();
@@ -21,18 +21,18 @@ const Book = mongoose.model("Book", bookSchema);
 
 app.use(bodyParser.json());
 
-// Middleware to convert short ID to MongoDB ObjectID
-const convertToObjectId = (req, res, next) => {
-  const { id } = req.params;
-  if (id.length === 24) {
-    // Assume it's a valid MongoDB ObjectID
-    req.params.id = mongoose.Types.ObjectId(id);
+// GET all books
+app.get("/books", async (req, res) => {
+  try {
+    const books = await Book.find();
+    res.json(books);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
-  next();
-};
+});
 
-// GET a specific book by ID (accepts short or long ID)
-app.get("/books/:id", convertToObjectId, async (req, res) => {
+// GET a specific book by ID
+app.get("/books/:id", async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
@@ -45,8 +45,19 @@ app.get("/books/:id", convertToObjectId, async (req, res) => {
   }
 });
 
-// PUT update an existing book (accepts short or long ID)
-app.put("/books/:id", convertToObjectId, async (req, res) => {
+// POST a new book
+app.post("/books", async (req, res) => {
+  try {
+    const newBook = new Book(req.body);
+    const savedBook = await newBook.save();
+    res.json(savedBook);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// PUT update an existing book
+app.put("/books/:id", async (req, res) => {
   try {
     const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -61,8 +72,8 @@ app.put("/books/:id", convertToObjectId, async (req, res) => {
   }
 });
 
-// DELETE a book (accepts short or long ID)
-app.delete("/books/:id", convertToObjectId, async (req, res) => {
+// DELETE a book
+app.delete("/books/:id", async (req, res) => {
   try {
     const deletedBook = await Book.findByIdAndDelete(req.params.id);
     if (!deletedBook) {

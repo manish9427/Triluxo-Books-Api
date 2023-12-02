@@ -8,7 +8,7 @@ const port = 3000;
 const mongoURI =
   "mongodb+srv://manish9427:manish9427@project.hwbxf7p.mongodb.net/?retryWrites=true&w=majority";
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoURI);
 
 // MongoDB schema for Book with a custom ID
 const bookSchema = new mongoose.Schema({

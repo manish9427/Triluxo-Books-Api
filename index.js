@@ -1,18 +1,18 @@
-const express = require("express");
 const mongoose = require("mongoose");
+const express = require("express");
 const bodyParser = require("body-parser");
 
 const app = express();
 const port = 3000;
 
+// MongoDB Atlas connection string
 const mongoURI =
   "mongodb+srv://manish9427:manish9427@project.hwbxf7p.mongodb.net/?retryWrites=true&w=majority";
 
-mongoose.connect(mongoURI);
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// MongoDB schema for Book with a custom ID
+// MongoDB schema for Book
 const bookSchema = new mongoose.Schema({
-  customId: { type: String, unique: true },
   title: String,
   author: String,
   genre: String,
@@ -22,20 +22,20 @@ const Book = mongoose.model("Book", bookSchema);
 
 app.use(bodyParser.json());
 
-// GET all books
-app.get("/books", async (req, res) => {
-  try {
-    const books = await Book.find();
-    res.json(books);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+// Middleware to convert short ID to MongoDB ObjectID
+const convertToObjectId = (req, res, next) => {
+  const { id } = req.params;
+  if (id.length === 24) {
+    // Assume it's a valid MongoDB ObjectID
+    req.params.id = mongoose.Types.ObjectId(id);
   }
-});
+  next();
+};
 
-// GET a specific book by custom ID
-app.get("/books/:customId", async (req, res) => {
+// GET a specific book by ID (accepts short or long ID)
+app.get("/books/:id", convertToObjectId, async (req, res) => {
   try {
-    const book = await Book.findOne({ customId: req.params.customId });
+    const book = await Book.findById(req.params.id);
     if (!book) {
       res.status(404).json({ error: "Book not found" });
       return;
@@ -46,25 +46,12 @@ app.get("/books/:customId", async (req, res) => {
   }
 });
 
-// POST a new book
-app.post("/books", async (req, res) => {
+// PUT update an existing book (accepts short or long ID)
+app.put("/books/:id", convertToObjectId, async (req, res) => {
   try {
-    const newBook = new Book(req.body);
-    const savedBook = await newBook.save();
-    res.json(savedBook);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// PUT update an existing book by custom ID
-app.put("/books/:customId", async (req, res) => {
-  try {
-    const updatedBook = await Book.findOneAndUpdate(
-      { customId: req.params.customId },
-      req.body,
-      { new: true }
-    );
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!updatedBook) {
       res.status(404).json({ error: "Book not found" });
       return;
@@ -75,12 +62,10 @@ app.put("/books/:customId", async (req, res) => {
   }
 });
 
-// DELETE a book by custom ID
-app.delete("/books/:customId", async (req, res) => {
+// DELETE a book (accepts short or long ID)
+app.delete("/books/:id", convertToObjectId, async (req, res) => {
   try {
-    const deletedBook = await Book.findOneAndDelete({
-      customId: req.params.customId,
-    });
+    const deletedBook = await Book.findByIdAndDelete(req.params.id);
     if (!deletedBook) {
       res.status(404).json({ error: "Book not found" });
       return;
@@ -92,5 +77,5 @@ app.delete("/books/:customId", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on ${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });

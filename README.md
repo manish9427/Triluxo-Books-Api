@@ -1,8 +1,10 @@
 # Triluxo-Books-Api
 
+# Demo Link => https://drive.google.com/file/d/18ffyGYVB8sAOdCibwL7LG7ONMK-ADYbV/view?usp=sharing
+
 # Base URL
 
-The base URL for all endpoints is https://triluxo-books-api.onrender.com.
+The base URL for all endpoints is https://triluxo-books-api.onrender.com
 
 # Endpoints
 
@@ -34,7 +36,3 @@ Endpoint: DELETE /books/:customId
 Description: Delete a book from the library using its custom ID.
 
 Example:https://triluxo-books-api.onrender.com/books/002
-
-# Notes
-
-Ensure to replace placeholder values like :customId with actual values when making requests.
